@@ -1,36 +1,56 @@
+check_inventory_period: 2
+
 wrench:
   ==: org.bukkit.inventory.ItemStack
   v: 2586
-  type: PHANTOM_MEMBRANE
+  type: WOODEN_SWORD
   meta:
     ==: ItemMeta
     meta-type: UNSPECIFIC
     display-name: '[{"text":"Wrench","italic":false}]'
     lore:
       - '[{"text":"","italic":false}]'
-      - '[{"text":"Can rotate some","italic":false,"color":"white"}]'
-      - '[{"text":"redstone","italic":false,"color":"red","underlined":true},{"text":" contraptions","color":"white","underlined":false}]'
+      - '[{"text":"Can rotate some","italic":false,"color":"white"},{"text":"","italic":false,"color":"dark_purple"}]'
+      - '[{"text":"redstone","italic":false,"color":"dark_red","underlined":true},{"text":"
+      contraptions","color":"white","underlined":false}]'
+    custom-model-data: 1000
 hammer:
   ==: org.bukkit.inventory.ItemStack
   v: 2586
-  type: PHANTOM_MEMBRANE
+  type: WOODEN_SWORD
   meta:
     ==: ItemMeta
     meta-type: UNSPECIFIC
     display-name: '[{"text":"Hammer","italic":false}]'
     lore:
       - '[{"text":"","italic":false}]'
-      - '[{"text":"Can rotate some","italic":false,"color":"white"}]'
-      - '[{"text":"building","italic":false,"color":"gray","underlined":true},{"text":" blocks","color":"white","underlined":false}]'
+      - '[{"text":"Can rotate some","italic":false,"color":"white"},{"text":"","italic":false,"color":"dark_purple"}]'
+      - '[{"text":"building","italic":false,"color":"gray","underlined":true},{"text":"
+      blocks","color":"white","underlined":false}]'
+    custom-model-data: 1001
 brush:
   ==: org.bukkit.inventory.ItemStack
   v: 2586
-  type: PHANTOM_MEMBRANE
+  type: LEATHER_HORSE_ARMOR
   meta:
     ==: ItemMeta
-    meta-type: UNSPECIFIC
+    meta-type: LEATHER_ARMOR
     display-name: '[{"text":"Brush","italic":false}]'
     lore:
       - '[{"text":"","italic":false}]'
-      - '[{"text":"Can ","italic":false,"color":"white"},{"text":"p","color":"red","underlined":true},{"text":"a","color":"gold","underlined":true},{"text":"i","color":"yellow","underlined":true},{"text":"n","color":"dark_green","underlined":true},{"text":"t","color":"aqua","underlined":true}]'
+      - '[{"text":"Can ","italic":false,"color":"white"},{"text":"p","color":"dark_red","underlined":true},{"text":"a","color":"gold","underlined":true},{"text":"i","color":"yellow","underlined":true},{"text":"n","color":"dark_green","underlined":true},{"text":"t","color":"aqua","underlined":true},{"text":"","color":"dark_purple","underlined":false}]'
       - '[{"text":"some blocks","italic":false,"color":"white"}]'
+    custom-model-data: 1000
+painted_brush:
+  ==: org.bukkit.inventory.ItemStack
+  v: 2586
+  type: LEATHER_HORSE_ARMOR
+  meta:
+    ==: ItemMeta
+    meta-type: LEATHER_ARMOR
+    display-name: '[{"text":"Brush","italic":false}]'
+    lore:
+      - '[{"text":"","italic":false}]'
+      - '[{"text":"Can ","italic":false,"color":"white"},{"text":"p","color":"dark_red","underlined":true},{"text":"a","color":"gold","underlined":true},{"text":"i","color":"yellow","underlined":true},{"text":"n","color":"dark_green","underlined":true},{"text":"t","color":"aqua","underlined":true},{"text":"","color":"dark_purple","underlined":false}]'
+      - '[{"text":"some blocks","italic":false,"color":"white"}]'
+    custom-model-data: 1001

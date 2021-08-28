@@ -4,6 +4,8 @@ main: com.danikvitek.statetools.Main
 api-version: 1.16
 authors: [ Danik_Vitek ]
 description: Use different tools to rotate redstone blocks, building blocks or paint paintable blocks
+softdepend:
+  - CoreProtect
 
 commands:
   statetool:

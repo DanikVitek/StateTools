@@ -2,11 +2,15 @@ package com.danikvitek.statetools;
 
 import com.danikvitek.statetools.utils.Colored;
 import com.danikvitek.statetools.utils.ToolsEnum;
+import net.coreprotect.CoreProtectAPI;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Orientable;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.block.data.type.Piston;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Stairs;
@@ -35,7 +39,7 @@ public class InteractionsEventListener implements Listener {
                     LeatherArmorMeta colorMeta = (LeatherArmorMeta) paintedBrush.getItemMeta();
                     assert colorMeta != null;
                     colorMeta.setCustomModelData(Objects.requireNonNull(ToolsEnum.PAINTED_BRUSH.getItem().getItemMeta()).getCustomModelData());
-                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInOffHand().getType().getKey().getKey().substring(0, player.getInventory().getItemInOffHand().getType().getKey().getKey().indexOf("_")).toUpperCase()).getColor());
+                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInOffHand().getType().getKey().getKey().replace("_dye", "").toUpperCase()).getColor());
                     paintedBrush.setItemMeta(colorMeta);
                     player.getInventory().setItemInMainHand(paintedBrush);
                 }
@@ -43,7 +47,7 @@ public class InteractionsEventListener implements Listener {
                     ItemStack paintedBrush = player.getInventory().getItemInMainHand();
                     LeatherArmorMeta colorMeta = (LeatherArmorMeta) paintedBrush.getItemMeta();
                     assert colorMeta != null;
-                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInOffHand().getType().getKey().getKey().substring(0, player.getInventory().getItemInOffHand().getType().getKey().getKey().indexOf("_")).toUpperCase()).getColor());
+                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInOffHand().getType().getKey().getKey().replace("_dye", "").toUpperCase()).getColor());
                     paintedBrush.setItemMeta(colorMeta);
                 }
                 else if (ToolsEnum.isBrush(player.getInventory().getItemInOffHand()) && player.getInventory().getItemInMainHand().getType().getKey().getKey().endsWith("_dye")) {
@@ -51,7 +55,7 @@ public class InteractionsEventListener implements Listener {
                     LeatherArmorMeta colorMeta = (LeatherArmorMeta) paintedBrush.getItemMeta();
                     assert colorMeta != null;
                     colorMeta.setCustomModelData(Objects.requireNonNull(ToolsEnum.PAINTED_BRUSH.getItem().getItemMeta()).getCustomModelData());
-                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInMainHand().getType().getKey().getKey().substring(0, player.getInventory().getItemInMainHand().getType().getKey().getKey().indexOf("_")).toUpperCase()).getColor());
+                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInMainHand().getType().getKey().getKey().replace("_dye", "").toUpperCase()).getColor());
                     paintedBrush.setItemMeta(colorMeta);
                     player.getInventory().setItemInOffHand(paintedBrush);
                 }
@@ -59,10 +63,9 @@ public class InteractionsEventListener implements Listener {
                     ItemStack paintedBrush = player.getInventory().getItemInOffHand();
                     LeatherArmorMeta colorMeta = (LeatherArmorMeta) paintedBrush.getItemMeta();
                     assert colorMeta != null;
-                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInMainHand().getType().getKey().getKey().substring(0, player.getInventory().getItemInMainHand().getType().getKey().getKey().indexOf("_")).toUpperCase()).getColor());
+                    colorMeta.setColor(DyeColor.valueOf(player.getInventory().getItemInMainHand().getType().getKey().getKey().replace("_dye", "").toUpperCase()).getColor());
                     paintedBrush.setItemMeta(colorMeta);
                 }
-                // todo: unpaint all other brushes in the inventory
                 for (int i = 0; i <= 35; i++) {
                     if (i != player.getInventory().getHeldItemSlot() || !player.getInventory().getItemInOffHand().getType().getKey().getKey().endsWith("_dye")) {
                         ItemStack itemStack = player.getInventory().getItem(i);
@@ -109,6 +112,7 @@ public class InteractionsEventListener implements Listener {
                         switch (event.getClickedBlock().getType()) {
                             case HOPPER:
                             case PISTON:
+                            case STICKY_PISTON:
                             case DISPENSER:
                             case DROPPER:
                             case OBSERVER: {
@@ -121,6 +125,7 @@ public class InteractionsEventListener implements Listener {
                                 directionalData.setFacing(faces.get(nextIndex));
                                 event.getClickedBlock().setBlockData(directionalData);
                                 cooldowns.put(player, System.currentTimeMillis() + 100L);
+                                addToCoreProtectLog(event.getClickedBlock(), player);
                                 break;
                             }
                         }
@@ -154,6 +159,7 @@ public class InteractionsEventListener implements Listener {
                             stairsData.setFacing(faces.get(i[2]));
                             event.getClickedBlock().setBlockData(stairsData);
                             cooldowns.put(player, System.currentTimeMillis() + 100L);
+                            addToCoreProtectLog(event.getClickedBlock(), player);
                         } else if (Tag.SLABS.isTagged(event.getClickedBlock().getType())) {
                             Slab slabData = (Slab) event.getClickedBlock().getBlockData();
                             if (!slabData.getType().equals(Slab.Type.DOUBLE)) {
@@ -162,6 +168,7 @@ public class InteractionsEventListener implements Listener {
                                 slabData.setType(halves.get(nextIndex));
                                 event.getClickedBlock().setBlockData(slabData);
                                 cooldowns.put(player, System.currentTimeMillis() + 100L);
+                                addToCoreProtectLog(event.getClickedBlock(), player);
                             }
                         } else if (Tag.LOGS.isTagged(event.getClickedBlock().getType()) ||
                                 event.getClickedBlock().getType().equals(Material.QUARTZ_PILLAR) ||
@@ -174,20 +181,54 @@ public class InteractionsEventListener implements Listener {
                             orientableData.setAxis(axes.get(nextIndex));
                             event.getClickedBlock().setBlockData(orientableData);
                             cooldowns.put(player, System.currentTimeMillis() + 100L);
+                            addToCoreProtectLog(event.getClickedBlock(), player);
                         }
                     }
                 }
                 else if (ToolsEnum.isPaintedBrush(mainHandItem)) {
                     if ((cooldowns.get(player) == null || cooldowns.get(player) < System.currentTimeMillis()) &&
                         Colored.hasColor(event.getClickedBlock()) && !Colored.hasSameColor(mainHandItem, event.getClickedBlock())) {
-                        event.getClickedBlock().setType(
-                                Material.valueOf(
-                                        Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString()))
-                                        ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())
-                                        : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())));
+                        if (!event.getClickedBlock().getType().getKey().getKey().endsWith("_bed"))
+                            event.getClickedBlock().setType(
+                                    Material.valueOf(
+                                            Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString()))
+                                            ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())
+                                            : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())));
+//                        else {
+//                            BlockFace facing = ((Bed) event.getClickedBlock().getBlockData()).getFacing();
+//                            Bed.Part part = ((Bed) event.getClickedBlock().getBlockData()).getPart();
+//                            Bed firstHalfBedData = (Bed) Material.valueOf(
+//                                            Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString()))
+//                                                    ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())
+//                                                    : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                            firstHalfBedData.setPart(part);
+//                            firstHalfBedData.setFacing(facing);
+//                            event.getClickedBlock().setBlockData(firstHalfBedData);
+//                            if (firstHalfBedData.getPart().equals(Bed.Part.FOOT) && event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).getBlockData() instanceof Bed) {
+//                                Bed secondHalfBedData = (Bed) Material.valueOf(
+//                                                Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString()))
+//                                                        ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())
+//                                                        : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                                secondHalfBedData.setPart(Bed.Part.HEAD);
+//                                secondHalfBedData.setFacing(firstHalfBedData.getFacing());
+//                                event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).setBlockData(secondHalfBedData);
+//                                addToCoreProtectLog(event.getClickedBlock().getRelative(firstHalfBedData.getFacing()), player);
+//                            }
+//                            else if (firstHalfBedData.getPart().equals(Bed.Part.HEAD) && event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).getBlockData() instanceof Bed) {
+//                                Bed secondHalfBedData = (Bed) Material.valueOf(
+//                                        Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString()))
+//                                                ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())
+//                                                : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(mainHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                                secondHalfBedData.setPart(Bed.Part.FOOT);
+//                                secondHalfBedData.setFacing(facing);
+//                                event.getClickedBlock().getRelative(firstHalfBedData.getFacing().getOppositeFace()).setBlockData(secondHalfBedData);
+//                                addToCoreProtectLog(event.getClickedBlock().getRelative(firstHalfBedData.getFacing().getOppositeFace()), player);
+//                            }
+//                        }
                         if (!player.getGameMode().equals(GameMode.CREATIVE))
                             player.getInventory().getItemInOffHand().setAmount(player.getInventory().getItemInOffHand().getAmount() - 1);
                         cooldowns.put(player, System.currentTimeMillis());
+                        addToCoreProtectLog(event.getClickedBlock(), player);
                     }
                 }
             }
@@ -198,6 +239,7 @@ public class InteractionsEventListener implements Listener {
                         switch (event.getClickedBlock().getType()) {
                             case HOPPER:
                             case PISTON:
+                            case STICKY_PISTON:
                             case DISPENSER:
                             case DROPPER:
                             case OBSERVER: {
@@ -210,6 +252,7 @@ public class InteractionsEventListener implements Listener {
                                 directionalData.setFacing(faces.get(nextIndex));
                                 event.getClickedBlock().setBlockData(directionalData);
                                 cooldowns.put(player, System.currentTimeMillis());
+                                addToCoreProtectLog(event.getClickedBlock(), player);
                                 break;
                             }
                         }
@@ -243,6 +286,7 @@ public class InteractionsEventListener implements Listener {
                             stairsData.setFacing(faces.get(i[2]));
                             event.getClickedBlock().setBlockData(stairsData);
                             cooldowns.put(player, System.currentTimeMillis());
+                            addToCoreProtectLog(event.getClickedBlock(), player);
                         } else if (Tag.SLABS.isTagged(event.getClickedBlock().getType())) {
                             Slab slabData = (Slab) event.getClickedBlock().getBlockData();
                             if (!slabData.getType().equals(Slab.Type.DOUBLE)) {
@@ -251,6 +295,7 @@ public class InteractionsEventListener implements Listener {
                                 slabData.setType(halves.get(nextIndex));
                                 event.getClickedBlock().setBlockData(slabData);
                                 cooldowns.put(player, System.currentTimeMillis());
+                                addToCoreProtectLog(event.getClickedBlock(), player);
                             }
                         } else if (Tag.LOGS.isTagged(event.getClickedBlock().getType()) ||
                                 event.getClickedBlock().getType().equals(Material.QUARTZ_PILLAR) ||
@@ -263,23 +308,62 @@ public class InteractionsEventListener implements Listener {
                             orientableData.setAxis(axes.get(nextIndex));
                             event.getClickedBlock().setBlockData(orientableData);
                             cooldowns.put(player, System.currentTimeMillis());
+                            addToCoreProtectLog(event.getClickedBlock(), player);
                         }
                     }
                 }
                 else if (ToolsEnum.isPaintedBrush(offHandItem)) {
                     if ((cooldowns.get(player) == null || cooldowns.get(player) < System.currentTimeMillis()) &&
                         Colored.hasColor(event.getClickedBlock()) && !Colored.hasSameColor(offHandItem, event.getClickedBlock())) {
-                        event.getClickedBlock().setType(
-                                Material.valueOf(
-                                        Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString()))
-                                        ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())
-                                        : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())));
+                        if (!event.getClickedBlock().getType().getKey().getKey().endsWith("_bed"))
+                            event.getClickedBlock().setType(
+                                    Material.valueOf(
+                                            Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString()))
+                                            ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())
+                                            : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())));
+//                        else {
+//                            BlockFace facing = ((Bed) event.getClickedBlock().getBlockData()).getFacing();
+//                            Bed.Part part = ((Bed) event.getClickedBlock().getBlockData()).getPart();
+//                            Bed firstHalfBedData = (Bed) Material.valueOf(
+//                                    Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString()))
+//                                            ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())
+//                                            : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                            firstHalfBedData.setPart(part);
+//                            firstHalfBedData.setFacing(facing);
+//                            event.getClickedBlock().setBlockData(firstHalfBedData);
+//                            if (firstHalfBedData.getPart().equals(Bed.Part.FOOT) && event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).getBlockData() instanceof Bed) {
+//                                Bed secondHalfBedData = (Bed) Material.valueOf(
+//                                        Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString()))
+//                                                ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())
+//                                                : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                                secondHalfBedData.setPart(Bed.Part.HEAD);
+//                                secondHalfBedData.setFacing(firstHalfBedData.getFacing());
+//                                event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).setBlockData(secondHalfBedData);
+//                                addToCoreProtectLog(event.getClickedBlock().getRelative(firstHalfBedData.getFacing()), player);
+//                            }
+//                            else if (firstHalfBedData.getPart().equals(Bed.Part.HEAD) && event.getClickedBlock().getRelative(firstHalfBedData.getFacing()).getBlockData() instanceof Bed) {
+//                                Bed secondHalfBedData = (Bed) Material.valueOf(
+//                                        Arrays.stream(Material.values()).map(Material::toString).collect(Collectors.toList()).contains(event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString()))
+//                                                ? event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_")), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())
+//                                                : event.getClickedBlock().getType().toString().replace(event.getClickedBlock().getType().toString().substring(0, event.getClickedBlock().getType().toString().indexOf("_", event.getClickedBlock().getType().toString().indexOf("_") + 1)), Objects.requireNonNull(DyeColor.getByColor(((LeatherArmorMeta) Objects.requireNonNull(offHandItem.getItemMeta())).getColor())).toString())).createBlockData();
+//                                secondHalfBedData.setPart(Bed.Part.FOOT);
+//                                secondHalfBedData.setFacing(facing);
+//                                event.getClickedBlock().getRelative(firstHalfBedData.getFacing().getOppositeFace()).setBlockData(secondHalfBedData);
+//                                addToCoreProtectLog(event.getClickedBlock().getRelative(firstHalfBedData.getFacing().getOppositeFace()), player);
+//                            }
+//                        }
                         if (!player.getGameMode().equals(GameMode.CREATIVE))
                             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                         cooldowns.put(player, System.currentTimeMillis());
+                        addToCoreProtectLog(event.getClickedBlock(), player);
                     }
                 }
             }
         }
+    }
+
+    private void addToCoreProtectLog(Block block, Player player) {
+        CoreProtectAPI api = Main.getCoreProtect();
+        if (api != null) api.logInteraction(player.getName(), block.getLocation());
     }
 }
