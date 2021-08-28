@@ -1,0 +1,36 @@
+wrench:
+  ==: org.bukkit.inventory.ItemStack
+  v: 2586
+  type: PHANTOM_MEMBRANE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: '[{"text":"Wrench","italic":false}]'
+    lore:
+      - '[{"text":"","italic":false}]'
+      - '[{"text":"Can rotate some","italic":false,"color":"white"}]'
+      - '[{"text":"redstone","italic":false,"color":"red","underlined":true},{"text":" contraptions","color":"white","underlined":false}]'
+hammer:
+  ==: org.bukkit.inventory.ItemStack
+  v: 2586
+  type: PHANTOM_MEMBRANE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: '[{"text":"Hammer","italic":false}]'
+    lore:
+      - '[{"text":"","italic":false}]'
+      - '[{"text":"Can rotate some","italic":false,"color":"white"}]'
+      - '[{"text":"building","italic":false,"color":"gray","underlined":true},{"text":" blocks","color":"white","underlined":false}]'
+brush:
+  ==: org.bukkit.inventory.ItemStack
+  v: 2586
+  type: PHANTOM_MEMBRANE
+  meta:
+    ==: ItemMeta
+    meta-type: UNSPECIFIC
+    display-name: '[{"text":"Brush","italic":false}]'
+    lore:
+      - '[{"text":"","italic":false}]'
+      - '[{"text":"Can ","italic":false,"color":"white"},{"text":"p","color":"red","underlined":true},{"text":"a","color":"gold","underlined":true},{"text":"i","color":"yellow","underlined":true},{"text":"n","color":"dark_green","underlined":true},{"text":"t","color":"aqua","underlined":true}]'
+      - '[{"text":"some blocks","italic":false,"color":"white"}]'
